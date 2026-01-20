@@ -6,15 +6,46 @@ class Program
 {
     static void Main()
     {
-        List<Scripture> scriptures = new List<Scripture>
+        Scripture scriptureCollection = new Scripture();
+        
+        Console.WriteLine("Enter scriptures (format: Book Chapter:Verse[-EndVerse] Text). Type 'done' when finished:");
+        while (true)
         {
-            new Scripture(new Reference("John", 3, 16), "For God so loved the world that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life."),
-            new Scripture(new Reference("Proverbs", 3, 5, 6), "Trust in the Lord with all thine heart; and lean not unto thine own understanding. In all thy ways acknowledge him, and he shall direct thy paths.")
-        };
-
-        Random rand = new Random();
-        Scripture selectedScripture = scriptures[rand.Next(scriptures.Count)];
-
+            string input = Console.ReadLine();
+            if (input.ToLower() == "done") break;
+            
+            var parts = input.Split(new[] { ' ' }, 2);
+            if (parts.Length < 2) continue;
+            
+            string referencePart = parts[0];
+            string text = parts[1];
+            
+            var refParts = referencePart.Split(new[] { ' ', ':', '-' });
+            if (refParts.Length < 2) continue;
+            
+            string book = refParts[0];
+            int chapter = int.Parse(refParts[1]);
+            int startVerse = int.Parse(refParts[2]);
+            int? endVerse = refParts.Length > 3 ? int.Parse(refParts[3]) : (int?)null;
+            
+            scriptureCollection.AddScripture(new Reference(book, chapter, startVerse, endVerse), text);
+        }
+        
+        Console.WriteLine("Choose a scripture to study:");
+        var scriptures = scriptureCollection.GetAllScriptures();
+        for (int i = 0; i < scriptures.Count; i++)
+        {
+            Console.WriteLine($"{i + 1}. {scriptures[i].Reference}");
+        }
+        
+        int choice;
+        while (!int.TryParse(Console.ReadLine(), out choice) || choice < 1 || choice > scriptures.Count)
+        {
+            Console.WriteLine("Invalid choice. Please enter a valid number.");
+        }
+        
+        Scripture selectedScripture = scriptures[choice - 1];
+        
         while (!selectedScripture.AllWordsHidden())
         {
             Console.Clear();
@@ -66,13 +97,29 @@ class Word
 
 class Scripture
 {
-    public Reference Reference { get; }
+    private List<Scripture> scriptures;
+    public Reference Reference { get; private set; }
     private List<Word> Words { get; }
-
+    
+    public Scripture()
+    {
+        scriptures = new List<Scripture>();
+    }
+    
     public Scripture(Reference reference, string text)
     {
         Reference = reference;
         Words = text.Split(' ').Select(word => new Word(word)).ToList();
+    }
+
+    public void AddScripture(Reference reference, string text)
+    {
+        scriptures.Add(new Scripture(reference, text));
+    }
+    
+    public List<Scripture> GetAllScriptures()
+    {
+        return scriptures;
     }
 
     public void HideRandomWords(int count)
