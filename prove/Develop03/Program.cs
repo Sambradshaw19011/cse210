@@ -15,7 +15,7 @@ class Program
             Console.Clear();
             Console.WriteLine(selectedScripture.GetDisplayText());
             Console.WriteLine("\nPress enter to hide words or type 'quit' to exit.");
-            
+
             string input = Console.ReadLine();
             if (input.ToLower() == "quit") break;
 
@@ -23,7 +23,7 @@ class Program
 
             wordsToHide++;
         }
-        }
+    }
 }
 
 class Reference
@@ -79,12 +79,12 @@ class Scripture
     private List<Scripture> scriptures;
     public Reference Reference { get; private set; }
     private List<Word> Words { get; }
-    
+
     public Scripture()
     {
         scriptures = new List<Scripture>();
     }
-    
+
     public Scripture(Reference reference, string text)
     {
         Reference = reference;
@@ -95,7 +95,7 @@ class Scripture
     {
         scriptures.Add(new Scripture(reference, text));
     }
-    
+
     public List<Scripture> GetAllScriptures()
     {
         return scriptures;
