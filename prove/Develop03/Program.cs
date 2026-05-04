@@ -6,76 +6,55 @@ class Program
 {
     static void Main()
     {
-        Scripture scriptureCollection = new Scripture();
-        
-        Console.WriteLine("Enter scriptures (format: Book Chapter:Verse[-EndVerse] Text). Type 'done' when finished:");
-        while (true)
-        {
-            string input = Console.ReadLine();
-            if (input.ToLower() == "done") break;
-            
-            var parts = input.Split(new[] { ' ' }, 2);
-            if (parts.Length < 2) continue;
-            
-            string referencePart = parts[0];
-            string text = parts[1];
-            
-            var refParts = referencePart.Split(new[] { ' ', ':', '-' });
-            if (refParts.Length < 2) continue;
-            
-            string book = refParts[0];
-            int chapter = int.Parse(refParts[1]);
-            int startVerse = int.Parse(refParts[2]);
-            int? endVerse = refParts.Length > 3 ? int.Parse(refParts[3]) : (int?)null;
-            
-            scriptureCollection.AddScripture(new Reference(book, chapter, startVerse, endVerse), text);
-        }
-        
-        Console.WriteLine("Choose a scripture to study:");
-        var scriptures = scriptureCollection.GetAllScriptures();
-        for (int i = 0; i < scriptures.Count; i++)
-        {
-            Console.WriteLine($"{i + 1}. {scriptures[i].Reference}");
-        }
-        
-        int choice;
-        while (!int.TryParse(Console.ReadLine(), out choice) || choice < 1 || choice > scriptures.Count)
-        {
-            Console.WriteLine("Invalid choice. Please enter a valid number.");
-        }
-        
         Scripture selectedScripture = scriptures[choice - 1];
-        
+
+        int wordsToHide = 3;
+
         while (!selectedScripture.AllWordsHidden())
         {
             Console.Clear();
             Console.WriteLine(selectedScripture.GetDisplayText());
             Console.WriteLine("\nPress enter to hide words or type 'quit' to exit.");
+            
             string input = Console.ReadLine();
             if (input.ToLower() == "quit") break;
-            selectedScripture.HideRandomWords(3);
+
+            selectedScripture.HideRandomWords(wordsToHide);
+
+            wordsToHide++;
         }
-    }
+        }
 }
 
 class Reference
 {
-    public string Book { get; }
-    public int Chapter { get; }
-    public int StartVerse { get; }
-    public int? EndVerse { get; }
+    private string _book;
+    private int _chapter;
+    private int _startVerse;
+    private int _endVerse;
 
-    public Reference(string book, int chapter, int startVerse, int? endVerse = null)
+    public Reference(string book, int chapter, int verse)
     {
-        Book = book;
-        Chapter = chapter;
-        StartVerse = startVerse;
-        EndVerse = endVerse;
+        _book = book;
+        _chapter = chapter;
+        _startVerse = verse;
+        _endVerse = verse;
+    }
+
+    public Reference(string book, int chapter, int startVerse, int endVerse)
+    {
+        _book = book;
+        _chapter = chapter;
+        _startVerse = startVerse;
+        _endVerse = endVerse;
     }
 
     public override string ToString()
     {
-        return EndVerse == null ? $"{Book} {Chapter}:{StartVerse}" : $"{Book} {Chapter}:{StartVerse}-{EndVerse}";
+        if (_startVerse == _endVerse)
+            return $"{_book} {_chapter}:{_startVerse}";
+        else
+            return $"{_book} {_chapter}:{_startVerse}-{_endVerse}";
     }
 }
 
